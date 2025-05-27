@@ -236,3 +236,8 @@ shopify app dev --reset
     - [`useTranslation` hook](https://react.i18next.com/latest/usetranslation-hook)
     - [`Trans` component usage with components array](https://react.i18next.com/latest/trans-component#alternative-usage-components-array)
   - [i18n-ally VS Code extension](https://marketplace.visualstudio.com/items?itemName=Lokalise.i18n-ally)
+
+
+
+
+  ## What about webhook on config initializer shopify app?

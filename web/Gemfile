@@ -33,10 +33,10 @@ gem "jbuilder"
 gem "redis", "~> 4.0"
 
 # Use Kredis to get higher-level data types in Redis [https://github.com/rails/kredis]
-# gem "kredis"
+gem "kredis"
 
 # Use Active Model has_secure_password [https://guides.rubyonrails.org/active_model_basics.html#securepassword]
-# gem "bcrypt", "~> 3.1.7"
+gem "bcrypt", "~> 3.1.7"
 
 # Windows timezone data
 gem "tzinfo-data"
@@ -59,6 +59,7 @@ group :development, :test do
   gem 'pry'
   gem 'pry-byebug'
   gem 'rspec-rails', '~> 6.0.0'
+  gem 'dotenv-rails'
 end
 
 group :development do
@@ -66,14 +67,13 @@ group :development do
   gem 'web-console'
 
   # Add speed badges [https://github.com/MiniProfiler/rack-mini-profiler]
-  # gem "rack-mini-profiler"
-
-  # Speed up commands on slow machines / big apps [https://github.com/rails/spring]
-  # gem "spring"
+  gem "rack-mini-profiler"
 
   # Ruby code style checking
   gem 'rubocop'
   gem 'rubocop-shopify'
+  gem 'rubocop-rails'
+  gem 'rubocop-rspec'
 end
 
 group :test do
@@ -81,6 +81,8 @@ group :test do
   gem 'capybara'
   gem 'selenium-webdriver'
   gem 'webdrivers'
+  gem 'shoulda-matchers'
+  gem 'database_cleaner-active_record'
 end
 
 # Shopify app development framework

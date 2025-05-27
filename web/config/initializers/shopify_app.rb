@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 ShopifyApp.configure do |config|
-  config.application_name = "My Shopify App"
-  config.scope = ENV.fetch("SCOPES", "write_products") # See shopify.app.toml for scopes
+  config.application_name = "Stockwise"
+  config.scope = ENV.fetch("SCOPES", "read_orders,read_products,read_inventory")
   # Consult this page for more scope options: https://shopify.dev/api/usage/access-scopes
   config.embedded_app = true
   config.after_authenticate_job = false
@@ -15,7 +15,7 @@ ShopifyApp.configure do |config|
   # Online Access Tokens Configuration
   # https://shopify.dev/docs/apps/build/authentication-authorization/access-token-types/online-access-tokens
   # Uncomment the following line to enable Online Access Tokens:
-  # config.user_session_repository = "User"
+  config.user_session_repository = "User"
 
   config.reauth_on_access_scope_changes = true
   config.new_embedded_auth_strategy = true
@@ -24,6 +24,25 @@ ShopifyApp.configure do |config|
   config.login_url = "/api/auth"
   config.login_callback_url = "/api/auth/callback"
   config.embedded_redirect_url = "/ExitIframe"
+
+  # Webhooks configuration
+  config.webhooks = [
+    {
+      topic: 'orders/create',
+      address: '/webhooks/orders_create',
+      format: 'json'
+    },
+    {
+      topic: 'orders/updated',
+      address: '/webhooks/orders_updated',
+      format: 'json'
+    },
+    {
+      topic: 'products/update',
+      address: '/webhooks/products_update',
+      format: 'json'
+    }
+  ]
 
   # You may want to charge merchants for using your app. Setting the billing configuration will cause the Authenticated
   # controller concern to check that the session is for a merchant that has an active one-time payment or subscription.
