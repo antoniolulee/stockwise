@@ -240,4 +240,78 @@ shopify app dev --reset
 
 
 
-  ## What about webhook on config initializer shopify app?
+  ## Busines logic
+
+  # Stockwise - Gestión Inteligente de Inventario para Shopify
+
+## Resumen Ejecutivo
+
+**Stockwise** es una aplicación SaaS diseñada para merchants de Shopify que necesitan un control preciso de su inventario. La aplicación previene rupturas de stock y exceso de inventario mediante alertas automáticas, dashboards visuales y predicciones basadas en datos históricos de ventas.
+
+## Problema que Resuelve
+
+Los merchants de Shopify enfrentan desafíos constantes con la gestión de inventario:
+- **Rupturas de stock** que resultan en ventas perdidas
+- **Exceso de inventario** que inmoviliza capital
+- **Falta de visibilidad** sobre el estado real del inventario
+- **Gestión manual** de umbrales por variante que consume tiempo
+
+## Público Objetivo
+
+- **Tiendas pequeñas y medianas** en Shopify
+- **Merchants con múltiples variantes** que requieren control granular
+- **Equipos con recursos limitados** que buscan automatización asequible
+
+## Propuesta de Valor
+
+### 1. Control Automático de Umbrales
+- Configuración de umbrales mínimos por variante
+- Cálculo automático de "salud del inventario": `((stock_actual - umbral_mínimo) / umbral_mínimo) × 100`
+- Sin necesidad de etiquetado manual
+
+### 2. Dashboard Visual de Inventario
+- **Sistema de semáforo**: Verde (saludable) / Amarillo (atención) / Rojo (crítico)
+- **Métricas de ventas**: Unidades vendidas en 2, 4 y 8 semanas
+- **Recomendaciones**: Sugerencias para ajustar umbrales basadas en patrones de venta
+
+### 3. Predicciones Inteligentes
+- Forecasting de reposición basado en históricos de ventas
+- Planificación de producción y reabastecimiento
+
+## Objetivos de Impacto
+
+- **80% reducción** en rupturas de stock
+- **40% disminución** en exceso de inventario
+- **20% tasa de adopción** en tiendas objetivo durante los primeros 6 meses
+
+## Arquitectura de la Aplicación
+
+### Modelos de Datos Principales
+
+#### Shop
+Representa la tienda Shopify conectada a la aplicación.
+- Credenciales OAuth
+- URL de acceso
+- Configuración global
+
+#### Variant
+Cada variante de producto configurada por el merchant.
+- Shopify ID
+- Shopify Product ID
+- Shopify Variant ID
+- Shopify Product Title
+- Shopify Variant Title
+- Current stock (quantity)
+- Minimum threshold
+- Health percentage
+- Tracking status (active, inactive)
+- sold_last_2_weeks (unidades vendidas en las últimas 2 semanas)
+- sold_last_4_weeks (unidades vendidas en las últimas 4 semanas)
+- sold_last_8_weeks (unidades vendidas en las últimas 8 semanas)
+
+
+
+#### InventoryLog
+Registro de cambios en el inventario.
+
+Scheduler para tareas diarias.
