@@ -38,3 +38,6 @@
 /config/credentials.yml.enc
 
 Gemfile.lock
+
+# Ignore RSpec examples.txt
+spec/examples.txt
