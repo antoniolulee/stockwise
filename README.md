@@ -315,3 +315,6 @@ Belongs to shop
 Belongs to Item
 Belongs to Location
 
+
+## Tareas
+Revisar las validaciones en los modelos location y variant
