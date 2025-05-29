@@ -43,6 +43,18 @@ RSpec.describe Variant, type: :model do
       expect(valid_variant).not_to be_valid
       expect(valid_variant.errors[:variant_title]).to include("can't be blank")
     end
+
+    it 'requires minimum_quantity' do
+      valid_variant.minimum_quantity = nil
+      expect(valid_variant).not_to be_valid
+      expect(valid_variant.errors[:minimum_quantity]).to include("can't be blank")
+    end
+
+    it 'requires minimum_quantity to be greater than or equal to 0' do
+      valid_variant.minimum_quantity = -1
+      expect(valid_variant).not_to be_valid
+      expect(valid_variant.errors[:minimum_quantity]).to include('must be greater than or equal to 0')
+    end
   end
 
   describe 'associations' do
@@ -52,6 +64,18 @@ RSpec.describe Variant, type: :model do
 
     it 'has many inventory_levels' do
       expect(described_class.reflect_on_association(:inventory_levels).macro).to eq :has_many
+    end
+
+    it 'destroys all associated inventory_levels when variant is destroyed' do
+      variant = create(:variant, shop: shop)
+      # Creamos dos locations distintas
+      location1 = create(:location, shop: shop)
+      location2 = create(:location, shop: shop)
+      # Creamos dos inventory_levels para el mismo variant pero diferentes locations
+      create(:inventory_level, variant: variant, location: location1)
+      create(:inventory_level, variant: variant, location: location2)
+
+      expect { variant.destroy }.to change { InventoryLevel.count }.by(-2)
     end
   end
 

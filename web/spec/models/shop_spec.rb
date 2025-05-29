@@ -11,6 +11,8 @@ RSpec.describe Shop, type: :model do
     )
   end
 
+  let(:shop) { create(:shop) }
+
   describe 'validations' do
     it 'is valid with valid attributes' do
       expect(valid_shop).to be_valid
@@ -46,5 +48,14 @@ RSpec.describe Shop, type: :model do
     it 'returns the configured API version' do
       expect(valid_shop.api_version).to eq(ShopifyApp.configuration.api_version)
     end
+  end
+
+  it 'destroys all associated inventory_levels when location is destroyed' do
+    location = create(:location, shop: shop)
+    variant1 = create(:variant, shop: shop)
+    variant2 = create(:variant, shop: shop)
+    create(:inventory_level, location: location, variant: variant1)
+    create(:inventory_level, location: location, variant: variant2)
+    expect { location.destroy }.to change { InventoryLevel.count }.by(-2)
   end
 end 
