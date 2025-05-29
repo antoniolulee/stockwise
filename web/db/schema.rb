@@ -10,9 +10,34 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_07_15_093250) do
+ActiveRecord::Schema[7.1].define(version: 2025_05_29_100401) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "inventory_levels", force: :cascade do |t|
+    t.bigint "location_id", null: false
+    t.bigint "variant_id", null: false
+    t.integer "quantity", null: false
+    t.integer "minimum_quantity", null: false
+    t.decimal "health_percentage", precision: 10, scale: 2, null: false
+    t.string "shopify_inventory_item_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["location_id", "variant_id", "shopify_inventory_item_id"], name: "index_inventory_levels_on_location_variant_and_shopify_item", unique: true
+    t.index ["location_id"], name: "index_inventory_levels_on_location_id"
+    t.index ["variant_id"], name: "index_inventory_levels_on_variant_id"
+  end
+
+  create_table "locations", force: :cascade do |t|
+    t.bigint "shop_id", null: false
+    t.string "shopify_location_id", null: false
+    t.string "name", null: false
+    t.boolean "is_active", default: true
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["shop_id", "shopify_location_id"], name: "index_locations_on_shop_id_and_shopify_location_id", unique: true
+    t.index ["shop_id"], name: "index_locations_on_shop_id"
+  end
 
   create_table "shops", force: :cascade do |t|
     t.string "shopify_domain", null: false
@@ -42,9 +67,14 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_15_093250) do
     t.boolean "is_tracked", default: true
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "minimum_quantity", default: 0, null: false
     t.index ["shop_id"], name: "index_variants_on_shop_id"
     t.index ["shopify_variant_id"], name: "index_variants_on_shopify_variant_id", unique: true
+    t.check_constraint "minimum_quantity >= 0", name: "check_minimum_quantity_positive"
   end
 
+  add_foreign_key "inventory_levels", "locations"
+  add_foreign_key "inventory_levels", "variants"
+  add_foreign_key "locations", "shops"
   add_foreign_key "variants", "shops"
 end

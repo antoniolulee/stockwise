@@ -1,9 +1,12 @@
+# frozen_string_literal: true
+
 FactoryBot.define do
   factory :variant do
     association :shop
     sequence(:shopify_product_id) { |n| "gid://shopify/Product/#{n}" }
-    sequence(:shopify_variant_id) { |n| "gid://shopify/ProductVariant/#{n}" }
-    sequence(:variant_title) { |n| "Variant #{n}" }
+    sequence(:shopify_variant_id) { |n| "gid://shopify/InventoryItem/#{n}" }
+    variant_title { 'Default Variant' }
+    minimum_quantity { 10 }
     is_tracked { true }
   end
 end 
