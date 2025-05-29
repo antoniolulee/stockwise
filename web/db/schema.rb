@@ -34,4 +34,17 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_15_093250) do
     t.index ["shopify_user_id"], name: "index_users_on_shopify_user_id", unique: true
   end
 
+  create_table "variants", force: :cascade do |t|
+    t.bigint "shop_id", null: false
+    t.string "shopify_product_id", null: false
+    t.string "shopify_variant_id", null: false
+    t.string "variant_title", null: false
+    t.boolean "is_tracked", default: true
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["shop_id"], name: "index_variants_on_shop_id"
+    t.index ["shopify_variant_id"], name: "index_variants_on_shopify_variant_id", unique: true
+  end
+
+  add_foreign_key "variants", "shops"
 end

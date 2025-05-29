@@ -288,30 +288,30 @@ Los merchants de Shopify enfrentan desafíos constantes con la gestión de inven
 
 ### Modelos de Datos Principales
 
-#### Shop
-Representa la tienda Shopify conectada a la aplicación.
-- Credenciales OAuth
-- URL de acceso
-- Configuración global
+Variant:
+- Product ID GID
+- Variant ID GID
+- Variant Title
+- Tracked (boolean)
+Belongs to shop
+Has many InventoryLevels
 
-#### Variant
-Cada variante de producto configurada por el merchant.
-- Shopify ID
+
+Location:
+- Shopify Location ID
+- Shopify Location Name
+Belongs to shop
+Has many InventoryLevels
+
+
+InventoryLevel:
+- Shopify Location ID
 - Shopify Product ID
 - Shopify Variant ID
-- Shopify Product Title
-- Shopify Variant Title
 - Current stock (quantity)
-- Minimum threshold
+- Minimum stock (quantity)
 - Health percentage
-- Tracking status (active, inactive)
-- sold_last_2_weeks (unidades vendidas en las últimas 2 semanas)
-- sold_last_4_weeks (unidades vendidas en las últimas 4 semanas)
-- sold_last_8_weeks (unidades vendidas en las últimas 8 semanas)
+Belongs to shop
+Belongs to Item
+Belongs to Location
 
-
-
-#### InventoryLog
-Registro de cambios en el inventario.
-
-Scheduler para tareas diarias.
