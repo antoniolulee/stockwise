@@ -44,17 +44,6 @@ RSpec.describe Variant, type: :model do
       expect(valid_variant.errors[:variant_title]).to include("can't be blank")
     end
 
-    it 'requires minimum_quantity' do
-      valid_variant.minimum_quantity = nil
-      expect(valid_variant).not_to be_valid
-      expect(valid_variant.errors[:minimum_quantity]).to include("can't be blank")
-    end
-
-    it 'requires minimum_quantity to be greater than or equal to 0' do
-      valid_variant.minimum_quantity = -1
-      expect(valid_variant).not_to be_valid
-      expect(valid_variant.errors[:minimum_quantity]).to include('must be greater than or equal to 0')
-    end
   end
 
   describe 'associations' do

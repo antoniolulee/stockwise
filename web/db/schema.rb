@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_05_29_100401) do
+ActiveRecord::Schema[7.1].define(version: 2025_05_30_105940) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -18,7 +18,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_05_29_100401) do
     t.bigint "location_id", null: false
     t.bigint "variant_id", null: false
     t.integer "quantity", null: false
-    t.integer "minimum_quantity", null: false
+    t.integer "minimum_quantity", default: 0, null: false
     t.decimal "health_percentage", precision: 10, scale: 2, null: false
     t.string "shopify_inventory_item_id", null: false
     t.datetime "created_at", null: false
@@ -67,10 +67,8 @@ ActiveRecord::Schema[7.1].define(version: 2025_05_29_100401) do
     t.boolean "is_tracked", default: true
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.integer "minimum_quantity", default: 0, null: false
     t.index ["shop_id"], name: "index_variants_on_shop_id"
     t.index ["shopify_variant_id"], name: "index_variants_on_shopify_variant_id", unique: true
-    t.check_constraint "minimum_quantity >= 0", name: "check_minimum_quantity_positive"
   end
 
   add_foreign_key "inventory_levels", "locations"

@@ -6,7 +6,6 @@ FactoryBot.define do
     sequence(:shopify_product_id) { |n| "gid://shopify/Product/#{n}" }
     sequence(:shopify_variant_id) { |n| "gid://shopify/InventoryItem/#{n}" }
     variant_title { 'Default Variant' }
-    minimum_quantity { 10 }
     is_tracked { true }
   end
 end 
