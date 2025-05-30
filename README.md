@@ -335,3 +335,7 @@ Logica:
 10. Descargar y procesar el archivo de ventas del segundo bulk
 11. Finalizar sincronización
 
+Ahora tenemos que crear la llamada bulk de inventory levels por location..
+
+
+

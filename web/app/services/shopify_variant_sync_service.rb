@@ -6,11 +6,33 @@ class ShopifyVariantSyncService
   class SyncError < StandardError; end
 
   # Consulta GraphQL para obtener información detallada de variantes
-  # Incluye:
-  # - Información básica de la variante (id, título)
-  # - Estado de seguimiento del inventario
-  # - Niveles de inventario por ubicación
-  # - ID del producto padre
+  # La query está estructurada para obtener:
+  # 1. Información básica de la variante:
+  #    - id: Identificador único de la variante en Shopify
+  #      → Variant.shopify_variant_id
+  #    - title: Título de la variante
+  #      → Variant.variant_title
+  # 2. Información del item de inventario:
+  #    - id: Identificador único del item de inventario
+  #      → InventoryLevel.shopify_inventory_item_id
+  #    - tracked: Indica si el inventario está siendo rastreado
+  #      → Variant.is_tracked
+  #    - display_name: Nombre para mostrar del item
+  #      → No se utiliza actualmente en nuestros modelos ?
+  # 3. Niveles de inventario por ubicación:
+  #    - id: Identificador único del nivel de inventario
+  #      → No se utiliza actualmente en nuestros modelos ?
+  #    - quantities: Array con la cantidad disponible para venta
+  #      * available: Cantidad disponible para venta
+  #        → InventoryLevel.quantity
+  #    - location: Información de la ubicación
+  #      * id: Identificador único de la ubicación
+  #        → Location.shopify_location_id
+  #      * name: Nombre de la ubicación
+  #        → Location.name
+  # 4. Información del producto padre:
+  #    - id: Identificador único del producto
+  #      → Variant.shopify_product_id
   QUERY = <<~GRAPHQL
     query getVariantsStock($ids: [ID!]!) {
       nodes(ids: $ids) {
@@ -18,12 +40,21 @@ class ShopifyVariantSyncService
           id
           title
           inventoryItem {
+            id
             tracked
+            display_name
             inventoryLevels(first: 250) {
               edges {
                 node {
-                  available
-                  location { id name }
+                  id
+                  quantities(names: ["available"]) {
+                    name
+                    quantity
+                  }
+                  location { 
+                    id 
+                    name 
+                  }
                 }
               }
             }
@@ -47,6 +78,7 @@ class ShopifyVariantSyncService
   end
 
   # Sincroniza las variantes especificadas y sus niveles de inventario
+  # Este método es el punto de entrada principal para la sincronización
   # @param variant_ids [Array<String>] Array de IDs de variantes de Shopify a sincronizar
   # @raise [SyncError] Si hay un error durante la sincronización
   def sync_variants!(variant_ids)
@@ -90,6 +122,7 @@ class ShopifyVariantSyncService
   end
 
   # Procesa los datos de variantes obtenidos de Shopify
+  # Este método itera sobre cada variante y procesa sus datos en una transacción
   # @param nodes [Array<OpenStruct>] Nodos de respuesta GraphQL
   # @raise [SyncError] Si hay un error al procesar los datos
   def process_variants_data(nodes)
@@ -115,21 +148,25 @@ class ShopifyVariantSyncService
       shop_id: @shop.id,
       shopify_product_id: node.product.id,
       variant_title: node.title,
-      is_tracked: node.inventoryItem.tracked,
-      minimum_quantity: variant.minimum_quantity || 0
+      is_tracked: node.inventoryItem.tracked
     )
     variant.save!
     variant
   end
 
   # Procesa los niveles de inventario para una variante
+  # Este método itera sobre cada nivel de inventario y actualiza o crea los registros correspondientes
   # @param node [OpenStruct] Datos de la variante de Shopify
   # @param variant [Variant] Variante local
   def process_inventory_levels(node, variant)
     node.inventoryItem.inventoryLevels.edges.each do |edge|
       lvl = edge.node
       location = find_or_create_location(lvl.location)
-      update_inventory_level(variant, location, lvl, node.inventoryItem.id)
+      
+      # Encontrar la cantidad disponible en el array de quantities
+      available_quantity = lvl.quantities.find { |q| q.name == 'available' }&.quantity || 0
+      
+      update_inventory_level(variant, location, lvl, node.inventoryItem.id, available_quantity)
     end
   end
 
@@ -147,21 +184,24 @@ class ShopifyVariantSyncService
   end
 
   # Actualiza o crea un nivel de inventario
+  # Este método maneja la lógica de actualización de los niveles de inventario,
+  # incluyendo el cálculo del porcentaje de salud
   # @param variant [Variant] Variante local
   # @param location [Location] Ubicación local
   # @param level_data [OpenStruct] Datos de nivel de inventario de Shopify
   # @param inventory_item_id [String] ID del item de inventario de Shopify
-  def update_inventory_level(variant, location, level_data, inventory_item_id)
+  # @param available_quantity [Integer] Cantidad disponible
+  def update_inventory_level(variant, location, level_data, inventory_item_id, available_quantity)
     il = InventoryLevel.find_or_initialize_by(
       variant_id: variant.id,
       location_id: location.id
     )
 
-    minimum_quantity = il.minimum_quantity || variant.minimum_quantity
-    health_percentage = calculate_health_percentage(level_data.available, minimum_quantity)
+    minimum_quantity = il.minimum_quantity || 0
+    health_percentage = calculate_health_percentage(available_quantity, minimum_quantity)
 
     il.assign_attributes(
-      quantity: level_data.available,
+      quantity: available_quantity,
       minimum_quantity: minimum_quantity,
       health_percentage: health_percentage,
       shopify_inventory_item_id: inventory_item_id
@@ -170,6 +210,8 @@ class ShopifyVariantSyncService
   end
 
   # Calcula el porcentaje de salud del inventario
+  # La fórmula es: ((cantidad_disponible - cantidad_mínima) / cantidad_mínima) * 100
+  # Si la cantidad mínima es 0, retorna 0.0
   # @param available [Integer] Cantidad disponible
   # @param minimum_quantity [Integer] Cantidad mínima requerida
   # @return [Float] Porcentaje de salud (0.0 si minimum_quantity es 0)
