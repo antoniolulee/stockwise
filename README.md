@@ -317,4 +317,21 @@ Belongs to Location
 
 
 ## Tareas
-Revisar las validaciones en los modelos location y variant
+Lo primero que tendría sentido es pedir un bulk del quantity avaiable de todos los variants por location de la tienda.
+Pido mediante graphql los locations existentes
+Pido todos los variants de la tienda
+
+Logica:
+
+1. Iniciar sincronización
+2. Lanzar bulk de variants + inventario
+3. Lanzar consulta GraphQL de locations (en paralelo)
+4. Procesar locations en la base de datos
+5. Esperar a que termine el primer bulk
+6. Lanzar el segundo bulk (ventas/unidades vendidas)
+7. Descargar y procesar el archivo del primer bulk
+8. Procesar el primer bulk
+9. Esperar a que termine el segundo bulk
+10. Descargar y procesar el archivo de ventas del segundo bulk
+11. Finalizar sincronización
+
